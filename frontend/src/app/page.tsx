@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { defaultContent, type SiteContent } from "@/lib/site-data";
 
@@ -24,18 +25,25 @@ async function getSiteContent(): Promise<SiteContent> {
 
 export default async function HomePage() {
   const content = await getSiteContent();
+  const whatsappDigits = content.contact.whatsappNumber.replace(/\D/g, "");
+  const contactDetails = [content.contact.email, content.contact.phone, content.contact.address].filter((detail) => detail.trim());
 
   return (
-    <main className="overflow-hidden">
-      <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
+    <main id="home" className="overflow-hidden">
+      <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
         <Link href="/" className="text-lg font-black uppercase tracking-[0.18em] text-white">
           {content.name.split(" ").slice(0, 2).join(" ")}
         </Link>
-        <nav className="hidden items-center gap-8 text-sm text-slate-200 md:flex">
+        <nav aria-label="Main navigation" className="order-3 flex w-full gap-5 overflow-x-auto whitespace-nowrap text-sm text-slate-200 md:order-none md:w-auto md:flex-wrap">
+          <Link href="#home">Home</Link>
           <Link href="#destinations">Destinations</Link>
-          <Link href="#journeys">Journeys</Link>
+          <Link href="#packages">Packages</Link>
+          <Link href="#services">Services</Link>
+          <Link href="#gallery">Gallery</Link>
+          <Link href="#about">About</Link>
+          <Link href="#contact">Contact</Link>
           <Link href="#why-us">Why us</Link>
-          <Link href="#reviews">Reviews</Link>
+          <Link href="#testimonials">Testimonials</Link>
         </nav>
         <Link
           href="/admin"
@@ -60,7 +68,7 @@ export default async function HomePage() {
               {content.hero.primaryCta}
             </Link>
             <Link
-              href="#journeys"
+              href="#packages"
               className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
             >
               {content.hero.secondaryCta}
@@ -77,14 +85,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
+      {content.stats.length > 0 && <section className="mx-auto grid max-w-7xl gap-5 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
         {content.stats.map((stat) => (
           <div key={stat.label} className="rounded-2xl border border-white/10 bg-slate-900/60 p-5 text-center">
             <strong className="block text-3xl font-semibold text-white">{stat.value}</strong>
             <span className="mt-2 block text-sm text-slate-300">{stat.label}</span>
           </div>
         ))}
-      </section>
+      </section>}
 
       <section id="destinations" className="mx-auto max-w-7xl px-4 pb-10 pt-20 sm:px-6 lg:px-8">
         <div className="mb-8">
@@ -94,7 +102,7 @@ export default async function HomePage() {
           </h2>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
-          {content.destinations.map((destination) => (
+          {content.destinations.length === 0 ? <p className="text-slate-300">Destinations will appear here soon.</p> : content.destinations.map((destination) => (
             <article key={destination.name} className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-900/70">
               <div className="h-52 bg-[radial-gradient(circle_at_top,_rgba(74,222,128,0.3),transparent_30%),linear-gradient(135deg,#1d3a36,#0f172a)]" />
               <div className="space-y-4 p-5">
@@ -114,16 +122,16 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="journeys" className="mt-4 border-y border-white/10 bg-slate-900/50 py-20">
+      <section id="packages" className="mt-4 border-y border-white/10 bg-slate-900/50 py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 max-w-xl">
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">Signature journeys</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">Featured packages</p>
             <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">
               Travel shaped around your pace
             </h2>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
-            {content.journeys.map((journey) => (
+            {content.journeys.length === 0 ? <p className="text-slate-300">Journeys will appear here soon.</p> : content.journeys.map((journey) => (
               <article key={journey.title} className="rounded-[1.75rem] border border-white/10 bg-slate-950/70 p-6">
                 <span className="inline-flex rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-amber-200">
                   {journey.duration}
@@ -136,6 +144,21 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section id="services" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mb-8 max-w-xl">
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">How we help</p>
+          <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">Services for a smoother journey</h2>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {content.services.length === 0 ? <p className="text-slate-300">Services will appear here soon.</p> : content.services.map((service) => (
+            <article key={service.title} className="border-t border-emerald-400/50 bg-slate-900/50 p-5">
+              <h3 className="text-xl font-semibold text-white">{service.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-slate-300">{service.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section id="why-us" className="mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-emerald-300">Why travellers choose us</p>
@@ -144,7 +167,7 @@ export default async function HomePage() {
           </h2>
         </div>
         <ul className="space-y-4">
-          {content.benefits.map((benefit) => (
+          {content.benefits.length === 0 ? <li className="text-slate-300">Travel details will appear here soon.</li> : content.benefits.map((benefit) => (
             <li key={benefit} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-slate-900/60 p-4 text-slate-100">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10 text-lg text-emerald-300">✓</span>
               <span>{benefit}</span>
@@ -153,7 +176,49 @@ export default async function HomePage() {
         </ul>
       </section>
 
-      <section id="reviews" className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+      <section id="gallery" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">Field notes</p>
+          <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">A glimpse of the way there</h2>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {content.gallery.length === 0 ? <p className="text-slate-300">Gallery photographs will appear here soon.</p> : content.gallery.map((image, index) => (
+            <figure key={`${image.imageUrl}-${index}`} className="group relative overflow-hidden rounded-xl bg-slate-900">
+              <div className="relative aspect-[4/5]">
+                <Image
+                  src={image.imageUrl}
+                  alt={image.alt}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="object-cover transition duration-500 group-hover:scale-105"
+                />
+              </div>
+              <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-4 pb-4 pt-12 text-sm text-white">
+                {image.caption}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
+      <section id="about" className="mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">{content.about.eyebrow}</p>
+          <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">{content.about.title}</h2>
+          <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">{content.about.body}</p>
+        </div>
+        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-900">
+          <Image
+            src={content.about.imageUrl}
+            alt={content.about.imageAlt}
+            fill
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-cover"
+          />
+        </div>
+      </section>
+
+      <section id="testimonials" className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
         <div className="mb-8">
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">Guest stories</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">
@@ -161,7 +226,7 @@ export default async function HomePage() {
           </h2>
         </div>
         <div className="grid gap-6 md:grid-cols-2">
-          {content.testimonials.map((testimonial) => (
+          {content.testimonials.length === 0 ? <p className="text-slate-300">Guest stories will appear here soon.</p> : content.testimonials.map((testimonial) => (
             <article key={testimonial.name} className="rounded-[1.75rem] border border-white/10 bg-slate-900/70 p-6">
               <p className="text-lg leading-8 text-slate-200">“{testimonial.quote}”</p>
               <div className="mt-5 flex flex-col gap-1 text-sm text-slate-300">
@@ -182,11 +247,35 @@ export default async function HomePage() {
             </h2>
           </div>
           <Link
-            href="#"
+            href="#contact"
             className="inline-flex items-center justify-center rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-300"
           >
             {content.cta.buttonText}
           </Link>
+        </div>
+      </section>
+
+      <section id="contact" className="border-y border-white/10 bg-slate-900/50">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-16 sm:px-6 md:flex-row md:items-end md:justify-between lg:px-8">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">Start a conversation</p>
+            <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-white">Let’s plan your next trip.</h2>
+            <div className="mt-5 flex flex-col gap-2 text-slate-300">
+              {content.contact.email && <a href={`mailto:${content.contact.email}`}>{content.contact.email}</a>}
+              {content.contact.phone && <a href={`tel:${content.contact.phone}`}>{content.contact.phone}</a>}
+              {content.contact.address && <span>{content.contact.address}</span>}
+            </div>
+          </div>
+          {whatsappDigits && (
+            <a
+              href={`https://wa.me/${whatsappDigits}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-emerald-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+            >
+              Chat on WhatsApp
+            </a>
+          )}
         </div>
       </section>
 
@@ -199,16 +288,18 @@ export default async function HomePage() {
           <div>
             <h3 className="text-lg font-semibold text-white">Contact</h3>
             <ul className="mt-4 space-y-2 text-slate-300">
-              <li>{content.contact.email}</li>
-              <li>{content.contact.phone}</li>
-              <li>{content.contact.address}</li>
+              {contactDetails.map((detail) => <li key={detail}>{detail}</li>)}
             </ul>
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">Quick links</h3>
             <ul className="mt-4 space-y-2 text-slate-300">
               <li><Link href="#destinations">Destinations</Link></li>
-              <li><Link href="#journeys">Journeys</Link></li>
+              <li><Link href="#packages">Packages</Link></li>
+              <li><Link href="#services">Services</Link></li>
+              <li><Link href="#gallery">Gallery</Link></li>
+              <li><Link href="#about">About</Link></li>
+              <li><Link href="#contact">Contact</Link></li>
               <li><Link href="/admin">Admin</Link></li>
             </ul>
           </div>

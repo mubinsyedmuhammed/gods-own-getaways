@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from pydantic import ValidationError
 
 from app.api.routes import get_content, upsert_content
-from app.schemas import SiteContentPayload
+from app.schemas import ContactContent, GalleryImageContent, SiteContentPayload
 
 
 VALID_CONTENT = {
@@ -21,10 +21,25 @@ VALID_CONTENT = {
     "stats": [],
     "destinations": [],
     "journeys": [],
+    "services": [],
+    "gallery": [
+        {
+            "imageUrl": "https://images.unsplash.com/photo-example",
+            "alt": "A sample landscape",
+            "caption": "A sample caption",
+        }
+    ],
+    "about": {
+        "eyebrow": "About",
+        "title": "Travel with care",
+        "body": "A sample about section",
+        "imageUrl": "https://images.unsplash.com/photo-example",
+        "imageAlt": "A sample landscape",
+    },
     "benefits": [],
     "testimonials": [],
     "cta": {"title": "Start planning", "buttonText": "Contact us"},
-    "contact": {"email": "", "phone": "", "address": ""},
+    "contact": {"email": "", "phone": "", "address": "", "whatsappNumber": ""},
 }
 
 
@@ -32,6 +47,26 @@ class SiteContentApiTests(unittest.TestCase):
     def test_content_payload_requires_expected_fields(self):
         with self.assertRaises(ValidationError):
             SiteContentPayload.model_validate({"name": "Incomplete"})
+
+    def test_gallery_rejects_unapproved_image_hosts(self):
+        with self.assertRaises(ValidationError):
+            GalleryImageContent(
+                imageUrl="https://example.com/travel.jpg",
+                alt="A landscape",
+                caption="A landscape",
+            )
+
+    def test_whatsapp_number_is_normalized_and_validated(self):
+        contact = ContactContent(
+            email="",
+            phone="",
+            address="",
+            whatsappNumber="+44 7700 900123",
+        )
+        self.assertEqual(contact.whatsappNumber, "447700900123")
+
+        with self.assertRaises(ValidationError):
+            ContactContent(email="", phone="", address="", whatsappNumber="123")
 
     def test_content_round_trips_through_upsert_and_read(self):
         db = Mock()

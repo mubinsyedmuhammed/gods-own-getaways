@@ -22,6 +22,15 @@ export type SiteContent = {
     duration: string;
     summary: string;
   }>;
+  services: Array<{ title: string; description: string }>;
+  gallery: Array<{ imageUrl: string; alt: string; caption: string }>;
+  about: {
+    eyebrow: string;
+    title: string;
+    body: string;
+    imageUrl: string;
+    imageAlt: string;
+  };
   benefits: string[];
   testimonials: Array<{
     name: string;
@@ -36,6 +45,7 @@ export type SiteContent = {
     email: string;
     phone: string;
     address: string;
+    whatsappNumber: string;
   };
 };
 
@@ -52,12 +62,7 @@ export const defaultContent: SiteContent = {
     primaryCta: "Plan my escape",
     secondaryCta: "Explore itineraries",
   },
-  stats: [
-    { label: "Happy travellers", value: "12k+" },
-    { label: "Tailored journeys", value: "320" },
-    { label: "Average rating", value: "4.9/5" },
-    { label: "Destination partners", value: "48" },
-  ],
+  stats: [],
   destinations: [
     {
       name: "Munnar",
@@ -82,33 +87,40 @@ export const defaultContent: SiteContent = {
     },
   ],
   journeys: [],
+  services: [
+    { title: "Bespoke itineraries", description: "Thoughtful trip planning shaped around your interests and pace." },
+    { title: "Handpicked stays", description: "A considered selection of places to stay, from quiet retreats to characterful hotels." },
+    { title: "Local experiences", description: "Meaningful ways to connect with the landscapes, food, and people of each place." },
+    { title: "On-trip support", description: "A helpful point of contact while you are away, so the details feel easy." },
+  ],
+  gallery: [
+    { imageUrl: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80", alt: "Mountain valley at sunrise", caption: "First light over the hills" },
+    { imageUrl: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1400&q=80", alt: "Quiet tropical coastline", caption: "A slower day by the water" },
+    { imageUrl: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1400&q=80", alt: "Lake among forested mountains", caption: "Room to breathe" },
+    { imageUrl: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1400&q=80", alt: "Waves rolling toward a beach", caption: "The coast, unhurried" },
+  ],
+  about: {
+    eyebrow: "A little about us",
+    title: "Travel with care, curiosity, and a local point of view.",
+    body: "We bring together thoughtful planning and a deep appreciation for the places we visit. Tell us what matters to you, and we will help shape a journey that feels like your own.",
+    imageUrl: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1400&q=80",
+    imageAlt: "Green mountain landscape beneath a wide sky",
+  },
   benefits: [
     "Tailor-made travel planning",
     "Trusted local expertise",
     "Luxury stays with seamless logistics",
     "24/7 trip support",
   ],
-  testimonials: [
-    {
-      name: "Ananya & Dev",
-      quote:
-        "Every detail felt personal. We arrived relaxed, inspired, and already planning our next trip.",
-      trip: "Munnar & Alleppey",
-    },
-    {
-      name: "Rahul K.",
-      quote:
-        "A rare mix of premium service and heartwarming local touches. It felt like travelling with friends.",
-      trip: "Wayanad getaway",
-    },
-  ],
+  testimonials: [],
   cta: {
     title: "Ready for a slower, richer kind of travel?",
     buttonText: "Book a consultation",
   },
   contact: {
-    email: "hello@godsowngetaways.com",
+    email: "",
     phone: "",
-    address: "Kochi, Kerala",
+    address: "",
+    whatsappNumber: "",
   },
 };
