@@ -1,7 +1,10 @@
 import re
-from urllib.parse import urlparse
+from datetime import datetime
+from urllib.parse import unquote, urlparse
 
 from pydantic import BaseModel, Field, field_validator, model_validator
+
+from app.core.config import get_settings
 
 
 def slugify(value: str) -> str:
@@ -40,13 +43,20 @@ class UnsplashImageContent(BaseModel):
     def validate_image_url(cls, value: str) -> str:
         if not value:
             return value
+        if value.startswith("/media/"):
+            parsed_local = urlparse(value)
+            if not parsed_local.query and not parsed_local.fragment and ".." not in unquote(parsed_local.path).split("/"):
+                return value
         parsed = urlparse(value)
-        if parsed.scheme != "https" or parsed.hostname != "images.unsplash.com":
-            raise ValueError("Images must use HTTPS and be hosted on images.unsplash.com")
+        if parsed.scheme != "https" or parsed.hostname not in get_settings().allowed_image_hostnames:
+            raise ValueError("Images must use HTTPS and a hostname configured in IMAGE_ALLOWED_HOSTS.")
         return value
 
 
 class DestinationContent(SluggedContent, UnsplashImageContent):
+    id: int | None = None
+    createdAt: datetime | None = None
+    updatedAt: datetime | None = None
     name: str
     region: str = ""
     tag: str = ""
@@ -61,7 +71,11 @@ class DestinationContent(SluggedContent, UnsplashImageContent):
 
 
 class PackageContent(SluggedContent, UnsplashImageContent):
+    id: int | None = None
+    createdAt: datetime | None = None
+    updatedAt: datetime | None = None
     title: str
+    destinationId: int | None = None
     destinationSlug: str = ""
     duration: str = ""
     summary: str = ""
@@ -79,8 +93,19 @@ class PackageContent(SluggedContent, UnsplashImageContent):
     sortOrder: int = 0
     highlights: list[str] = Field(default_factory=list)
 
+    @field_validator("currency")
+    @classmethod
+    def normalize_currency(cls, value: str) -> str:
+        currency = value.strip().upper()
+        if currency and not re.fullmatch(r"[A-Z]{3}", currency):
+            raise ValueError("Currency must be a three-letter ISO code")
+        return currency
+
 
 class ServiceContent(BaseModel):
+    id: int | None = None
+    createdAt: datetime | None = None
+    updatedAt: datetime | None = None
     title: str
     slug: str = ""
     shortDescription: str = ""
@@ -101,6 +126,9 @@ class ServiceContent(BaseModel):
 
 
 class GalleryImageContent(UnsplashImageContent):
+    id: int | None = None
+    createdAt: datetime | None = None
+    updatedAt: datetime | None = None
     title: str = ""
     alt: str = ""
     altText: str = ""
@@ -118,6 +146,9 @@ class AboutContent(UnsplashImageContent):
 
 
 class TestimonialContent(BaseModel):
+    id: int | None = None
+    createdAt: datetime | None = None
+    updatedAt: datetime | None = None
     name: str = ""
     quote: str = ""
     trip: str = ""
@@ -195,3 +226,18 @@ class SiteContentPayload(BaseModel):
     cta: CtaContent
     contact: ContactContent
     settings: SiteSettingsContent = Field(default_factory=SiteSettingsContent)
+
+    @model_validator(mode="after")
+    def ensure_unique_slugs(self) -> "SiteContentPayload":
+        for label, records in (
+            ("destination", self.destinations),
+            ("package", self.packages),
+            ("service", self.services),
+        ):
+            slugs = [record.slug for record in records]
+            if len(slugs) != len(set(slugs)):
+                raise ValueError(f"{label.capitalize()} slugs must be unique")
+        destination_slugs = {destination.slug for destination in self.destinations}
+        if any(package.destinationSlug and package.destinationSlug not in destination_slugs for package in self.packages):
+            raise ValueError("Packages must reference an existing destination slug")
+        return self

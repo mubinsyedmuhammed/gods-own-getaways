@@ -1,9 +1,15 @@
-import type { Metadata } from "next";
+import { DestinationCard } from "@/components/destinations/destination-card";
+import { pageMetadata } from "@/lib/seo";
+import { getSiteContent } from "@/lib/api";
 
-import { DestinationCard } from "@/components/travel-cards";
-import { getSiteContent } from "@/lib/site-content";
-
-export const metadata: Metadata = { title: "Destinations" };
+export async function generateMetadata() {
+  const content = await getSiteContent();
+  return pageMetadata(content, {
+    title: "Travel Destinations",
+    description: "Explore inspiring destinations and find the place that fits the way you want to travel.",
+    path: "/destinations",
+  });
+}
 
 export default async function DestinationsPage() {
   const content = await getSiteContent();

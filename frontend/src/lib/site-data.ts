@@ -11,6 +11,9 @@ export type SiteContent = {
   };
   stats: Array<{ label: string; value: string }>;
   destinations: Array<{
+    id?: number;
+    createdAt?: string | null;
+    updatedAt?: string | null;
     slug: string;
     name: string;
     region: string;
@@ -26,8 +29,12 @@ export type SiteContent = {
     sortOrder: number;
   }>;
   packages: Array<{
+    id?: number;
+    createdAt?: string | null;
+    updatedAt?: string | null;
     slug: string;
     title: string;
+    destinationId?: number | null;
     destinationSlug: string;
     duration: string;
     summary: string;
@@ -47,6 +54,9 @@ export type SiteContent = {
     highlights: string[];
   }>;
   services: Array<{
+    id?: number;
+    createdAt?: string | null;
+    updatedAt?: string | null;
     title: string;
     slug: string;
     shortDescription: string;
@@ -58,6 +68,9 @@ export type SiteContent = {
     sortOrder: number;
   }>;
   gallery: Array<{
+    id?: number;
+    createdAt?: string | null;
+    updatedAt?: string | null;
     imageUrl: string;
     title: string;
     alt: string;
@@ -76,6 +89,9 @@ export type SiteContent = {
   };
   benefits: string[];
   testimonials: Array<{
+    id?: number;
+    createdAt?: string | null;
+    updatedAt?: string | null;
     name: string;
     quote: string;
     trip: string;

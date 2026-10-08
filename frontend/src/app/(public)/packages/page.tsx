@@ -1,9 +1,15 @@
-import type { Metadata } from "next";
+import { PackageCard } from "@/components/packages/package-card";
+import { pageMetadata } from "@/lib/seo";
+import { getSiteContent } from "@/lib/api";
 
-import { PackageCard } from "@/components/travel-cards";
-import { getSiteContent } from "@/lib/site-content";
-
-export const metadata: Metadata = { title: "Travel Packages" };
+export async function generateMetadata() {
+  const content = await getSiteContent();
+  return pageMetadata(content, {
+    title: "Travel Packages",
+    description: "Explore thoughtfully curated travel packages and journeys, and find a trip tailored to your dates and interests.",
+    path: "/packages",
+  });
+}
 
 export default async function PackagesPage() {
   const content = await getSiteContent();
@@ -16,7 +22,7 @@ export default async function PackagesPage() {
       <p className="mt-4 max-w-2xl text-slate-300">Explore active packages and ask us to tailor one to your dates and interests.</p>
       {packages.length === 0 ? <p className="mt-12 text-slate-300">Packages will appear here soon.</p> : (
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {packages.map((travelPackage) => <PackageCard key={travelPackage.slug} travelPackage={travelPackage} />)}
+          {packages.map((travelPackage) => <PackageCard key={travelPackage.slug} travelPackage={travelPackage} whatsappNumber={content.contact.whatsappNumber} companyName={content.name} />)}
         </div>
       )}
     </main>

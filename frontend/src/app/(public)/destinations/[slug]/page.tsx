@@ -1,10 +1,43 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
-import { getSiteContent } from "@/lib/site-content";
+import { shouldOptimizeImage } from "@/lib/utils";
+import { pageMetadata } from "@/lib/seo";
+import { getSiteContent } from "@/lib/api";
 
-export default async function DestinationDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+type DestinationPageProps = { params: Promise<{ slug: string }> };
+
+export const revalidate = 300;
+
+export async function generateStaticParams() {
+  const content = await getSiteContent();
+  return content.destinations
+    .filter((destination) => destination.active && destination.slug)
+    .map((destination) => ({ slug: destination.slug }));
+}
+
+export async function generateMetadata({ params }: DestinationPageProps): Promise<Metadata> {
+  const [{ slug }, content] = await Promise.all([params, getSiteContent()]);
+  const destination = content.destinations.find((item) => item.slug === slug && item.active);
+  if (!destination) {
+    return { title: "Destination not found", robots: { index: false, follow: false } };
+  }
+
+  return pageMetadata(content, {
+    title: destination.name,
+    description:
+      destination.shortDescription ||
+      destination.description ||
+      `Explore ${destination.name}${destination.region ? ` in ${destination.region}` : ""} and plan your next journey.`,
+    path: `/destinations/${encodeURIComponent(slug)}`,
+    image: destination.imageUrl || undefined,
+    imageAlt: destination.imageAlt || destination.name,
+  });
+}
+
+export default async function DestinationDetailPage({ params }: DestinationPageProps) {
   const [{ slug }, content] = await Promise.all([params, getSiteContent()]);
   const destination = content.destinations.find((item) => item.slug === slug && item.active);
   if (!destination) notFound();
@@ -21,7 +54,7 @@ export default async function DestinationDetailPage({ params }: { params: Promis
           {destination.highlights.length > 0 && <ul className="mt-8 space-y-3 text-slate-200">{destination.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}</ul>}
           <Link href="/contact" className="mt-8 inline-flex rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold text-slate-950">Plan a visit</Link>
         </div>
-        {destination.imageUrl && <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-900"><Image src={destination.imageUrl} alt={destination.imageAlt} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" /></div>}
+        {destination.imageUrl && <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-900"><Image src={destination.imageUrl} alt={destination.imageAlt || destination.name} fill priority unoptimized={!shouldOptimizeImage(destination.imageUrl)} sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" /></div>}
       </div>
     </main>
   );

@@ -1,6 +1,6 @@
-from sqlalchemy import JSON, Boolean, Column, Integer, String, Text
+from sqlalchemy import Boolean, Column, Integer, JSON, String, Text
 
-from app.database import Base
+from app.core.database import Base
 
 
 class SiteContent(Base):

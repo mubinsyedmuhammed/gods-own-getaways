@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
-import { SiteFooter, SiteHeader } from "@/components/site-chrome";
-import { getSiteContent } from "@/lib/site-content";
+import { SiteFooter } from "@/components/footer/site-footer";
+import { SiteHeader } from "@/components/navbar/site-header";
+import { getSiteContent } from "@/lib/api";
 
 export default async function PublicLayout({ children }: { children: ReactNode }) {
   const content = await getSiteContent();
