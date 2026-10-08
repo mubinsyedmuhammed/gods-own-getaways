@@ -19,8 +19,33 @@ VALID_CONTENT = {
         "secondaryCta": "See journeys",
     },
     "stats": [],
-    "destinations": [],
-    "journeys": [],
+    "destinations": [
+        {
+            "slug": "sample-place",
+            "name": "Sample Place",
+            "region": "Sample region",
+            "tag": "Sample tag",
+            "description": "Sample description",
+            "price": "",
+            "imageUrl": "",
+            "imageAlt": "",
+            "highlights": [],
+        }
+    ],
+    "packages": [
+        {
+            "slug": "sample-package",
+            "title": "Sample Package",
+            "duration": "",
+            "summary": "Sample summary",
+            "description": "Sample description",
+            "price": "",
+            "active": True,
+            "imageUrl": "",
+            "imageAlt": "",
+            "highlights": [],
+        }
+    ],
     "services": [],
     "gallery": [
         {

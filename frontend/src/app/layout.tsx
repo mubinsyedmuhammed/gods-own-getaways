@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { getSiteContent } from "@/lib/site-content";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,11 +15,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "God's Own Getaways",
-  description:
-    "Premium travel experiences, curated stays, and custom journeys across Kerala and beyond.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const content = await getSiteContent();
+  const title = content.name.trim();
+  return {
+    title: title ? { default: title, template: `%s | ${title}` } : undefined,
+    description: content.description || undefined,
+    icons: content.settings.favicon ? { icon: content.settings.favicon } : undefined,
+  };
+}
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

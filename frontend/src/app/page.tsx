@@ -1,38 +1,31 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { defaultContent, type SiteContent } from "@/lib/site-data";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-async function getSiteContent(): Promise<SiteContent> {
-  if (!apiUrl) {
-    return defaultContent;
-  }
-
-  try {
-    const response = await fetch(`${apiUrl}/api/content`, { cache: "no-store" });
-    if (!response.ok) {
-      return defaultContent;
-    }
-
-    const content = (await response.json()) as SiteContent | null;
-    return content ?? defaultContent;
-  } catch {
-    return defaultContent;
-  }
-}
+import { getSiteContent } from "@/lib/site-content";
 
 export default async function HomePage() {
   const content = await getSiteContent();
   const whatsappDigits = content.contact.whatsappNumber.replace(/\D/g, "");
   const contactDetails = [content.contact.email, content.contact.phone, content.contact.address].filter((detail) => detail.trim());
+  const destinations = content.destinations
+    .filter((destination) => destination.active && destination.featured)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const packages = content.packages
+    .filter((travelPackage) => travelPackage.active && travelPackage.featured)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const services = content.services.filter((service) => service.active).sort((a, b) => a.sortOrder - b.sortOrder);
+  const gallery = content.gallery.filter((image) => image.active).sort((a, b) => a.sortOrder - b.sortOrder);
+  const testimonials = content.testimonials
+    .filter((testimonial) => testimonial.active)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
     <main id="home" className="overflow-hidden">
       <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
         <Link href="/" className="text-lg font-black uppercase tracking-[0.18em] text-white">
-          {content.name.split(" ").slice(0, 2).join(" ")}
+          {content.settings.logo ? (
+            <Image src={content.settings.logo} alt={content.name} width={160} height={48} unoptimized className="h-10 w-auto object-contain" />
+          ) : content.name.split(" ").slice(0, 2).join(" ")}
         </Link>
         <nav aria-label="Main navigation" className="order-3 flex w-full gap-5 overflow-x-auto whitespace-nowrap text-sm text-slate-200 md:order-none md:w-auto md:flex-wrap">
           <Link href="#home">Home</Link>
@@ -95,20 +88,23 @@ export default async function HomePage() {
       </section>}
 
       <section id="destinations" className="mx-auto max-w-7xl px-4 pb-10 pt-20 sm:px-6 lg:px-8">
-        <div className="mb-8">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">Curated destinations</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">
             Places that linger in memory
           </h2>
+          </div>
+          <Link href="/destinations" className="text-sm font-semibold text-emerald-300">Browse all destinations</Link>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
-          {content.destinations.length === 0 ? <p className="text-slate-300">Destinations will appear here soon.</p> : content.destinations.map((destination) => (
+          {destinations.length === 0 ? <p className="text-slate-300">Destinations will appear here soon.</p> : destinations.map((destination) => (
             <article key={destination.name} className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-900/70">
               <div className="h-52 bg-[radial-gradient(circle_at_top,_rgba(74,222,128,0.3),transparent_30%),linear-gradient(135deg,#1d3a36,#0f172a)]" />
               <div className="space-y-4 p-5">
                 <span className="text-[10px] uppercase tracking-[0.18em] text-emerald-300">{destination.tag}</span>
                 <div>
-                  <h3 className="text-2xl font-semibold text-white">{destination.name}</h3>
+                  <h3 className="text-2xl font-semibold text-white"><Link href={`/destinations/${destination.slug}`}>{destination.name}</Link></h3>
                   <p className="mt-1 text-sm text-amber-200">{destination.region}</p>
                 </div>
                 <p className="text-sm leading-7 text-slate-300">{destination.description}</p>
@@ -124,20 +120,24 @@ export default async function HomePage() {
 
       <section id="packages" className="mt-4 border-y border-white/10 bg-slate-900/50 py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 max-w-xl">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-xl">
             <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">Featured packages</p>
             <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">
               Travel shaped around your pace
             </h2>
+            </div>
+            <Link href="/packages" className="text-sm font-semibold text-emerald-300">Browse all packages</Link>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
-            {content.journeys.length === 0 ? <p className="text-slate-300">Journeys will appear here soon.</p> : content.journeys.map((journey) => (
+            {packages.length === 0 ? <p className="text-slate-300">Packages will appear here soon.</p> : packages.map((journey) => (
               <article key={journey.title} className="rounded-[1.75rem] border border-white/10 bg-slate-950/70 p-6">
                 <span className="inline-flex rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-amber-200">
                   {journey.duration}
                 </span>
                 <h3 className="mt-5 text-2xl font-semibold text-white">{journey.title}</h3>
-                <p className="mt-4 text-sm leading-7 text-slate-300">{journey.summary}</p>
+                <p className="mt-4 text-sm leading-7 text-slate-300">{journey.summary || journey.shortDescription}</p>
+                <Link href={`/packages/${journey.slug}`} className="mt-5 inline-flex text-sm font-semibold text-emerald-300">View package</Link>
               </article>
             ))}
           </div>
@@ -150,7 +150,7 @@ export default async function HomePage() {
           <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">Services for a smoother journey</h2>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {content.services.length === 0 ? <p className="text-slate-300">Services will appear here soon.</p> : content.services.map((service) => (
+          {services.length === 0 ? <p className="text-slate-300">Services will appear here soon.</p> : services.map((service) => (
             <article key={service.title} className="border-t border-emerald-400/50 bg-slate-900/50 p-5">
               <h3 className="text-xl font-semibold text-white">{service.title}</h3>
               <p className="mt-3 text-sm leading-7 text-slate-300">{service.description}</p>
@@ -182,12 +182,12 @@ export default async function HomePage() {
           <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">A glimpse of the way there</h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {content.gallery.length === 0 ? <p className="text-slate-300">Gallery photographs will appear here soon.</p> : content.gallery.map((image, index) => (
+          {gallery.length === 0 ? <p className="text-slate-300">Gallery photographs will appear here soon.</p> : gallery.map((image, index) => (
             <figure key={`${image.imageUrl}-${index}`} className="group relative overflow-hidden rounded-xl bg-slate-900">
               <div className="relative aspect-[4/5]">
                 <Image
                   src={image.imageUrl}
-                  alt={image.alt}
+                  alt={image.altText || image.alt}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover transition duration-500 group-hover:scale-105"
@@ -226,11 +226,12 @@ export default async function HomePage() {
           </h2>
         </div>
         <div className="grid gap-6 md:grid-cols-2">
-          {content.testimonials.length === 0 ? <p className="text-slate-300">Guest stories will appear here soon.</p> : content.testimonials.map((testimonial) => (
-            <article key={testimonial.name} className="rounded-[1.75rem] border border-white/10 bg-slate-900/70 p-6">
-              <p className="text-lg leading-8 text-slate-200">“{testimonial.quote}”</p>
+          {testimonials.length === 0 ? <p className="text-slate-300">Guest stories will appear here soon.</p> : testimonials.map((testimonial, index) => (
+            <article key={`${testimonial.customerName}-${index}`} className="rounded-[1.75rem] border border-white/10 bg-slate-900/70 p-6">
+              <p className="text-lg leading-8 text-slate-200">“{testimonial.content || testimonial.quote}”</p>
               <div className="mt-5 flex flex-col gap-1 text-sm text-slate-300">
-                <strong className="text-white">{testimonial.name}</strong>
+                <strong className="text-white">{testimonial.customerName || testimonial.name}</strong>
+                {testimonial.customerLocation && <span>{testimonial.customerLocation}</span>}
                 <span>{testimonial.trip}</span>
               </div>
             </article>
@@ -283,7 +284,7 @@ export default async function HomePage() {
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-3 lg:px-8">
           <div>
             <div className="text-lg font-black uppercase tracking-[0.18em] text-white">{content.name}</div>
-            <p className="mt-3 text-slate-300">{content.tagline}</p>
+            <p className="mt-3 text-slate-300">{content.settings.footerText || content.tagline}</p>
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">Contact</h3>

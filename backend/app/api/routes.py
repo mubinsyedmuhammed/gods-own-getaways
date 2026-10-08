@@ -28,7 +28,7 @@ def upsert_content(payload: SiteContentPayload, db: Session = Depends(get_db)) -
         content = SiteContent()
         db.add(content)
 
-    data = payload.model_dump(mode="json")
+    data = payload.model_dump(mode="json", exclude_unset=True)
     content.name = payload.name
     content.tagline = payload.tagline
     content.hero_title = payload.hero.title
